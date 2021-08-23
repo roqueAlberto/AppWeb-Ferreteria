@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
+*{
+    
+    font-family: 'Poppins', sans-serif;
+    
+}
+
+.shadow-sm{
+    
+    box-shadow: 0 0 1.25rem rgba(11,37,75,0.5);
+}
+
+.shadow-hover{
+    transition: 1s ease-in-out;
+}
+
+.shadow-hover:hover{
+    transition: 1s ease-in-out;
+    box-shadow: 0 .5rem 1rem rgba(11,37,75, .10);
+}
+
+.circle{
+    
+    width: 40px;
+    height: 60px;
+   
+}
+
+
+
+
+
+
+
+
+
+
