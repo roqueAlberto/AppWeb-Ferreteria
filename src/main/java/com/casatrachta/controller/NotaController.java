@@ -23,24 +23,21 @@ public class NotaController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+
             String opcion = request.getParameter("opcion");
 
             switch (opcion) {
 
                 case "escribir-nota":
                     guardar(request, response);
-
                     break;
 
                 case "buscar":
                     buscar(request, response);
-
                     break;
 
                 case "inicio":
-                    inicio(request, response);
-                    
+                    inicio(request, response);                   
                     break;
 
                 default:
@@ -48,7 +45,7 @@ public class NotaController extends HttpServlet {
 
             }
 
-        }
+       
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -138,18 +135,14 @@ public class NotaController extends HttpServlet {
         request.setAttribute("anotaciones", anotacion_dao.listar(getFechaActual()));
         request.setAttribute("fecha", getFechaActual());
         request.getRequestDispatcher("anotacion.do?opcion=default").forward(request, response);
-
     }
     
     
       private String getFechaActual() {
-
         Date date = new Date();
         SimpleDateFormat formato = new SimpleDateFormat("YYYY-MM-dd");
         String fecha = formato.format(date);
-
         return fecha;
-
     }
 
 }
