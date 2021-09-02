@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ProductoDAOImpl implements IProductoDao {
 
@@ -233,15 +235,15 @@ public class ProductoDAOImpl implements IProductoDao {
 
     /**
      * Este metodo actualiza el stock del producto seleccionado.
-     * @param codigo. Es el codigo identificativo del producto.
-     * @param stock . Es el nuevo stock que se actualizara en dicho producto.
+     * @param producto - Es el producto que sera modificado con el stock
+     * 
      */
     @Override
-    public void actualizarStock(String codigo, String stock) {
+    public void actualizarStock(Producto producto) {
 
         try {
             connection = Conexion.getConexion();
-            preparedStatement = connection.prepareStatement("UPDATE producto SET stock = '" + stock + "' WHERE codigo = '" + codigo + "'");
+            preparedStatement = connection.prepareStatement("UPDATE producto SET stock = '" + producto.getStock() + "' WHERE codigo = '" + producto.getCodigo() + "'");
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
@@ -422,5 +424,39 @@ public class ProductoDAOImpl implements IProductoDao {
         }
         return cantidad;
     }
+
+    @Override
+    public ArrayList<Producto> buscarProducto(String descripcion) {
+        
+        String query = "SELECT p.id_producto, p.nombre, s.nombre, p.codigo, p.precio, p.stock"
+                + " FROM producto p, seccion s WHERE p.seccion_id = s.id_seccion and p.nombre LIKE ?";
+        ArrayList<Producto> lista = new ArrayList<>();
+        Producto producto;
+        
+        try(Connection conect = Conexion.getConexion();
+                PreparedStatement preparedStatement = conect.prepareStatement(query)){
+            preparedStatement.setString(1, "%"+descripcion+"%");
+            
+           
+            ResultSet resultSet = preparedStatement.executeQuery();
+            
+            while(resultSet.next()){                
+                producto = new Producto(new Seccion());
+                producto.setId(resultSet.getLong(1));
+                producto.setNombre(resultSet.getString(2));
+                producto.getSeccion().setNombre(resultSet.getString(3));
+                producto.setCodigo(resultSet.getString(4));               
+                producto.setPrecio(resultSet.getString(5));
+                producto.setStock(resultSet.getString(6));                              
+                lista.add(producto);               
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(ProductoDAOImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            
+        return lista;
+    }
+
 
 }

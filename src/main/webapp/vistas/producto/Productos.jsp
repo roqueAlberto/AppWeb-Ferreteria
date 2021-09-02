@@ -154,14 +154,44 @@
                     <!-- Main row -->
                     <div class="row">
                         <div class="col-12 mt-4">
-                            <div class="card ">
-                                <div class="card-header ">
-                                    <h3 class="card-title font-weight-light">Lista de productos</h3>
+                            <div class="card">                                             
+                               <div class="d-flex">
+                                   
+                                   <form method = "post" action="producto.do?menu=lista">
+                                        <div class="form-group col-lg-11 mt-4 ml-3">
+                                            <p class="">Código de barra</p>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"
+                                                          ><i class="fas fa-barcode"></i
+                                                        ></span>
+                                                </div>
+                                                <input type="text" class="text-center form-control" name="codigo" id="codigo"/>
+                                                 <button class="btn btn-outline-info ml-2" type="submit" name="opcion" value="buscar-codigo">Buscar</button>
+                                            </div>
+                                        </div>
+                                       
+                                    </form>
+                                    
+                                    
+                                   <form action="producto.do?menu=lista" method="post">
+                                        <div class="form-group col-lg-11 ml-4 mt-4">
+                                            <p class="">Producto</p>
+                                            <div class="input-group">
+                                                
+                                                <input type="text" class="text-center form-control" name="producto" id="producto"/>
+                                                <button class="btn btn-outline-info ml-2" type="submit" name="opcion" value="buscar-producto">Buscar</button>
+
+                                            </div>
+                                        </div>
+                                    </form>
+
                                 </div>
-                                <!-- /.card-header -->
+
+
                                 <div class="card-body">
                                     <table class="table table-hover ">
-                                        <thead style="background: #001f3f; color: white">
+                                        <thead>
                                             <tr>
                                                 <th>Producto</th>
                                                 <th>Seccion</th>
@@ -172,7 +202,7 @@
                                             </tr>
                                         </thead>
                                         <c:forEach var="producto" items="${listaProductos}">
-                                            <tr class="font-italic">
+                                            <tr>
                                                 <td>${producto.getNombre()}</td>
                                                 <td>${producto.getSeccion().getNombre()}</td>
                                                 <td>${producto.getCodigo()}</td>                                                   
@@ -195,12 +225,12 @@
                 </div>
             </section>
             <div class="d-flex">
-            <a class="btn btn-success ml-3" href='producto.do?menu=lista&opcion=mostrar&pagina=${pagina - 1}'><i class="fas fa-arrow-circle-left"></i> Anterior</a>
-            <a class="btn btn-success ml-3" href='producto.do?menu=lista&opcion=mostrar&pagina=${pagina + 1}'>Siguiente <i class="fas fa-arrow-circle-right"></i></a>  
-            <p class="font-weight-bold ml-auto">Total de productos : </p><h5 class="text-danger mr-5"> ${totalProductos}</h5> 
+                <a class="ml-3" href='producto.do?menu=lista&opcion=mostrar&pagina=${pagina - 1}'><i class="fas fa-arrow-circle-left"></i> Anterior</a>
+                <a class="ml-3" href='producto.do?menu=lista&opcion=mostrar&pagina=${pagina + 1}'>Siguiente <i class="fas fa-arrow-circle-right"></i></a>  
+                <h5 class="text-info mr-5 ml-auto"> ${totalProductos} productos</h5> 
             </div>
 
-  
+
             <!--Ventana que muestra los datos del producto seleccionado-->
             <div class="container">
                 <div
@@ -348,34 +378,12 @@
     <script src="recursos/dist/js/pages/dashboard.js"></script>
     <script src="recursos/build/js/lista_productos.js"></script>
     <script>
-        $(function () {
-            $("#tabla_producto")
-                    .DataTable({
-                        responsive: true,
-                        lengthChange: false,
-                        autoWidth: false,
-                        buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
-
-                        language: {
-                            lengthMenu: "Mostrar_MENU_registros",
-                            zerorecords: "No se encontraro resultados",
-                            info: "Mostrando registros del _START_ al _END_ de un total de _TOTAL_",
-                            infoEmpty: "Mostrando registros del 0 al 0 de un total de 0 registros",
-                            infofiltered: "(filtrando de un total de _MAX_ registros)",
-                            sSearch: "Buscar",
-                            oPaginate: {
-                                sFirst: "Primero",
-                                sLast: "Ultimo",
-                                sNext: "Siguiente",
-                                sPrevious: "Anterior"
-                            },
-                            sProcessing: "Procesando..."
-                        }
-                    })
-                    .buttons()
-                    .container()
-                    .appendTo("#tabla_producto_wrapper .col-md-6:eq(0)");
-       });
+                                                        $(function () {
+                                                            
+                                                              $("#codigo").focus();
+                                                            
+                                                                                                            
+                                                        });
 
     </script> 
 </body>

@@ -12,10 +12,12 @@ public interface IProductoDao {
     public Producto getProducto(String codigo);
     public void actualizar(Producto producto);
     public void eliminar(int id);
-    public void actualizarStock(String codigo, String stock);
+    public void actualizarStock(Producto producto);
     public List<Producto> listarStockBajo(String valor);
     public ArrayList<Producto> listar(int pagina);
     public int totalPaginas();
     public int totalProductos();
+    public ArrayList<Producto> buscarProducto(String descripcion);
+  
 
 }
