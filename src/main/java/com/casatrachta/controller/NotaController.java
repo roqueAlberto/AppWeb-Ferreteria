@@ -3,8 +3,8 @@ package com.casatrachta.controller;
 
 
 import com.casatrachta.dao.impl.NotaDAOImpl;
+import com.casatrachta.model.Nota;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.servlet.ServletException;
@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "NotaController", urlPatterns = {"/anotacion.do"})
 public class NotaController extends HttpServlet {
 
-    NotaDAOImpl anotacion_dao = new NotaDAOImpl();
+  private NotaDAOImpl notaDao = new NotaDAOImpl();
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -41,7 +41,7 @@ public class NotaController extends HttpServlet {
                     break;
 
                 default:
-                    request.getRequestDispatcher("/vistas/otros/Anotacion.jsp").forward(request, response);
+                    request.getRequestDispatcher("/views/otros/Anotacion.jsp").forward(request, response);
 
             }
 
@@ -87,52 +87,29 @@ public class NotaController extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
-    /**
-     * Este metodo guarda las notas escritas por parte del usuario.
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException 
-     */
-    
+
     private void guardar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String nota = request.getParameter("anotacion");
-        anotacion_dao.guardar(nota, getFechaActual());
+        notaDao.guardar(nota,getFechaActual());
 
         request.getRequestDispatcher("anotacion.do?opcion=inicio").forward(request, response);
     }
 
-    
-    /**
-     * Este metodo busca a partir de una fecha establecidas las notas escritas en dicha fecha.
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException 
-     */
+  
     
     private void buscar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        String fecha = request.getParameter("fecha_obtenida");
-
-        request.setAttribute("anotaciones", anotacion_dao.listar(fecha));
+        String fecha = request.getParameter("fechaCapturada");
+        request.setAttribute("anotaciones", notaDao.listar(fecha));
         request.setAttribute("fecha", fecha);
         request.getRequestDispatcher("anotacion.do?opcion=default").forward(request, response);
     }
 
     
-    
-    /**
-     * Este metodo establece datos de inicio al ingresar al menu de 'Anotar'.
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException 
-     */
+   
     private void inicio(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        request.setAttribute("anotaciones", anotacion_dao.listar(getFechaActual()));
+        request.setAttribute("anotaciones", notaDao.listar(getFechaActual()));
         request.setAttribute("fecha", getFechaActual());
         request.getRequestDispatcher("anotacion.do?opcion=default").forward(request, response);
     }

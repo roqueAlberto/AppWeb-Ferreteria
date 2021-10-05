@@ -4,7 +4,7 @@ package com.casatrachta.model;
 
 public class Seccion {
     
-    private int id_seccion;
+    private int id;
     private String nombre;
 
     public Seccion() {
@@ -12,12 +12,12 @@ public class Seccion {
         
     }
 
-    public int getId_seccion() {
-        return id_seccion;
+    public int getId() {
+        return id;
     }
 
-    public void setId_seccion(int id_seccion) {
-        this.id_seccion = id_seccion;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getNombre() {

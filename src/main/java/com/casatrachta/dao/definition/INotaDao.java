@@ -1,7 +1,9 @@
 
 package com.casatrachta.dao.definition;
 
+
 import java.util.List;
+
 
 
 public interface INotaDao {

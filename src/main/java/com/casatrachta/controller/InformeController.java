@@ -108,37 +108,25 @@ public class InformeController extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
-    /**
-     * Metodo que describe datos acerca de las ventas realizadas.
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException 
-     */
+   
     private void verVentas(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {      
-        request.setAttribute("listaVentas", ventaDao.informeVenta(getFechaActual()));// ventas en la fecha actual 
+        request.setAttribute("listaVentas", ventaDao.report(getFechaActual()));// ventas en la fecha actual 
         request.setAttribute("fecha", getFechaActual()); // fecha actual
-        request.setAttribute("total", ventaDao.getCierreDeCaja(getFechaActual())); // total      
-        request.setAttribute("cantidadDebito", ventaDao.contarFormasPago(getFechaActual())[1]); // cantidad ventas con tarjeta de debito            
-        request.setAttribute("cantidadCredito", ventaDao.contarFormasPago(getFechaActual())[2]); //cantidad ventas con tarjeta de credito
-        request.setAttribute("efectivo", ventaDao.ventasFormaPago(getFechaActual())[0]); // total en efectivo                 
-        request.setAttribute("debito", ventaDao.ventasFormaPago(getFechaActual())[1]); //total en tarjeta de debito               
-        request.setAttribute("credito", ventaDao.ventasFormaPago(getFechaActual())[2]); //total en tarjeta de credito
+        request.setAttribute("total", ventaDao.closeSale(getFechaActual())); // total      
+        request.setAttribute("cantidadDebito", ventaDao.countPayments(getFechaActual())[1]); // cantidad ventas con tarjeta de debito            
+        request.setAttribute("cantidadCredito", ventaDao.countPayments(getFechaActual())[2]); //cantidad ventas con tarjeta de credito
+        request.setAttribute("efectivo", ventaDao.salePayments(getFechaActual())[0]); // total en efectivo                 
+        request.setAttribute("debito", ventaDao.salePayments(getFechaActual())[1]); //total en tarjeta de debito               
+        request.setAttribute("credito", ventaDao.salePayments(getFechaActual())[2]); //total en tarjeta de credito
         request.getRequestDispatcher("/vistas/venta/RegistroVenta.jsp").forward(request, response);       
     }
     
-    
-   
-    /**
-     * Metodo que informa el total recaudado en cada mes del año.
-     * @param response
-     * @throws IOException 
-     */
+  
     private void getMeses(HttpServletResponse response) throws IOException {
 
         try (PrintWriter out = response.getWriter()) {
 
-            String[] mes = ventaDao.totalPorMes();
+            String[] mes = ventaDao.totalForMonth();
 
             JSONObject jInforme = new JSONObject();           
             jInforme.put("enero", mes[0]);
@@ -157,50 +145,33 @@ public class InformeController extends HttpServlet {
         }
     }
 
-    
-    /**
-     * Este metodo brinda informacion de distintas elementos.
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException 
-     */
+  
     private void getInformacion(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setAttribute("totalCaja", ventaDao.getCierreDeCaja(getFechaActual()));
+        request.setAttribute("totalCaja", ventaDao.closeSale(getFechaActual()));
         request.setAttribute("totalGasto", gastoDao.establecerTotal(getFechaActual()));
         request.setAttribute("notas", notaDao.getCantidad(getFechaActual()));
-        request.setAttribute("listaLimitada", productoDao.listarStockBajo("LIMITADO"));
-        request.setAttribute("listaCompleta", productoDao.listarStockBajo("COMPLETO"));
+        request.setAttribute("listaLimitada", productoDao.allStockDown("LIMITADO"));
+        request.setAttribute("listaCompleta", productoDao.allStockDown("COMPLETO"));
         request.getRequestDispatcher("/index.jsp").forward(request, response);
     }
 
 
-    /**
-     * Metodo para buscar las ventas realizadas en la fecha indicada
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException 
-     */
     private void buscar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String fechaSeleccionada = request.getParameter("buscarVenta");
-        request.setAttribute("listaVentas", ventaDao.informeVenta(fechaSeleccionada));// ventas en la fecha actual 
+        request.setAttribute("listaVentas", ventaDao.report(fechaSeleccionada));// ventas en la fecha actual 
         request.setAttribute("fecha", fechaSeleccionada); // fecha actual
-        request.setAttribute("total", ventaDao.getCierreDeCaja(fechaSeleccionada)); // total      
-        request.setAttribute("cantidadDebito", ventaDao.contarFormasPago(fechaSeleccionada)[1]); // cantidad ventas con tarjeta de debito            
-        request.setAttribute("cantidadCredito", ventaDao.contarFormasPago(fechaSeleccionada)[2]); //cantidad ventas con tarjeta de credito
-        request.setAttribute("efectivo", ventaDao.ventasFormaPago(fechaSeleccionada)[0]); // total en efectivo                 
-        request.setAttribute("debito", ventaDao.ventasFormaPago(fechaSeleccionada)[1]); //total en tarjeta de debito               
-        request.setAttribute("credito", ventaDao.ventasFormaPago(fechaSeleccionada)[2]); //total en tarjeta de credito
-        request.getRequestDispatcher("/vistas/venta/RegistroVenta.jsp").forward(request, response); 
-        request.getRequestDispatcher("vistas/venta/RegistroVenta.jsp").forward(request, response);
+        request.setAttribute("total", ventaDao.closeSale(fechaSeleccionada)); // total      
+        request.setAttribute("cantidadDebito", ventaDao.countPayments(fechaSeleccionada)[1]); // cantidad ventas con tarjeta de debito            
+        request.setAttribute("cantidadCredito", ventaDao.countPayments(fechaSeleccionada)[2]); //cantidad ventas con tarjeta de credito
+        request.setAttribute("efectivo", ventaDao.salePayments(fechaSeleccionada)[0]); // total en efectivo                 
+        request.setAttribute("debito", ventaDao.salePayments(fechaSeleccionada)[1]); //total en tarjeta de debito               
+        request.setAttribute("credito", ventaDao.salePayments(fechaSeleccionada)[2]); //total en tarjeta de credito
+        request.getRequestDispatcher("/views/venta/RegistroVenta.jsp").forward(request, response); 
+        request.getRequestDispatcher("views/venta/RegistroVenta.jsp").forward(request, response);
     }
 
-    /**
-     * Esta función devuelve la fecha actual
-     * @return - fecha actual
-     */
+   
     private String getFechaActual() {
         Date date = new Date();
         SimpleDateFormat formato = new SimpleDateFormat("YYYY-MM-dd");

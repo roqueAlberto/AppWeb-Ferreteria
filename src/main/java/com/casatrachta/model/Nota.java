@@ -14,7 +14,9 @@ public class Nota {
         
     }
     
-    
+    public Nota(String descripcion) {
+        this.descripcion = descripcion;
+    }
     
 
     public String getDescripcion() {

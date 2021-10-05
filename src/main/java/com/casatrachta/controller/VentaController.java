@@ -1,10 +1,9 @@
 package com.casatrachta.controller;
 
-import com.casatrachta.model.Producto;
 import com.casatrachta.dao.impl.ProductoDAOImpl;
-import com.casatrachta.model.Venta;
+import com.casatrachta.model.Carrito;
 import com.casatrachta.dao.impl.VentaDAOImpl;
-import com.casatrachta.model.DetalleDeVenta;
+import com.casatrachta.model.ProductoEnCarrito;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
@@ -20,15 +19,15 @@ public class VentaController extends HttpServlet {
 
     private ProductoDAOImpl productoDao;
     private VentaDAOImpl ventaDao;
-    private Venta venta;
-    private Producto producto;
+    private Carrito carrito;
+    private ProductoEnCarrito producto;
 
     @Override
     public void init() {
-        producto = new Producto();
+        producto = new ProductoEnCarrito();
         productoDao = new ProductoDAOImpl();
         ventaDao = new VentaDAOImpl();
-        venta = new Venta();
+        carrito = new Carrito();
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -38,7 +37,6 @@ public class VentaController extends HttpServlet {
             String opcion = request.getParameter("opcion");
 
             switch (opcion) {
-
                 case "buscar":
                     buscar(request, response);
                     break;
@@ -61,20 +59,134 @@ public class VentaController extends HttpServlet {
 
                 case "modificar":
                     modificar(request, response);
-
+                    break;
+                    
+                case "prueba":                   
+                    response.sendRedirect("informe.do?opcion=inicio");                   
                     break;
 
                 default:
-                    request.setAttribute("listaProductos", venta.getListaProductos());
-                    request.setAttribute("total_p", venta.getTotal());
-                    request.getRequestDispatcher("/vistas/venta/RealizarVenta.jsp").forward(request, response);
+                    request.setAttribute("listaProductos", carrito.getProductos());
+                    request.setAttribute("total_p", carrito.getTotal());
+                    request.getRequestDispatcher("/views/venta/RealizarVenta.jsp").forward(request, response);
+            }      
+    }
+  
+    private void buscar(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        try (PrintWriter out = response.getWriter()) {
+            BigDecimal stockProducto;
+            String codigo = request.getParameter("codigo");
+            producto = productoDao.findByCodigo(codigo);
+            
+            int indice = carrito.buscar(producto.getId()); // 1)Buscar si el producto ya se encuentra en el carrito  
+            if (indice<0) {                             // 2)
+                 stockProducto = producto.getStock(); //  Si el producto no se encuentra, capturar el stock del nuevo producto agregado
+            }else{
+                stockProducto = carrito.getProductos().get(indice).getStock();  // Si se encuentra, capturar el stock actual que tiene el producto dentro del carrito. 
+            }
+            
+                   
+            JSONObject js = new JSONObject(); 
+            
+            
+            if (producto != null) // Si el producto existe..s
+            {
+                js.put("producto", true);
+                js.put("stock", stockProducto);
+                js.put("forma_de_venta", producto.getFormaVenta());
+            } else {
+                js.put("producto", false);
+                js.put("stock", 0);
+                js.put("forma_de_venta", 0);
 
             }
 
-        
+            out.print(js);
+
+        }
     }
 
-    @Override
+ 
+    private void agregar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        
+        String cantidadElegida = request.getParameter("cantidad");
+  
+
+        producto.setCantidad(new BigDecimal(cantidadElegida));
+        producto.indicarCantidad();
+        
+        carrito.agregar(producto);
+        
+        request.getSession().setAttribute("mensaje", "Producto agregado con exito");
+        response.sendRedirect("venta.do?opcion=default");
+       
+    }
+    
+   
+    private void generarVenta(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    
+        if (!carrito.getProductos().isEmpty()) {
+            int forma_pago = Integer.parseInt(request.getParameter("forma_pago"));
+            carrito.setMetodoPago(forma_pago); 
+            ventaDao.save(carrito);
+            carrito.limpiar();
+        }
+
+       response.sendRedirect("venta.do?opcion=default");
+    }
+
+ 
+    private void quitar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        long id = Long.parseLong(request.getParameter("id"));
+        carrito.quitar(id);
+        response.sendRedirect("venta.do?opcion=default");
+    }
+
+  
+    private void leerCantidad(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        try (PrintWriter out = response.getWriter()) {
+
+            int id = Integer.parseInt(request.getParameter("id"));
+            int indice = carrito.buscar(id);
+
+            ProductoEnCarrito pro = carrito.getProductos().get(indice);
+           
+            JSONObject jsCantidad = new JSONObject();
+            jsCantidad.put("cantidad", pro.getCantidad());
+            jsCantidad.put("unidad_medida", pro.getUnidadMedida());
+            jsCantidad.put("stock_disponible", pro.getStock());
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.setCharacterEncoding("utf8");
+            response.setContentType("application/json");
+            out.print(jsCantidad);
+        }
+
+    }
+
+    
+    
+    private void modificar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        int id = Integer.parseInt(request.getParameter("id"));       
+        String cantidad = request.getParameter("cantidad");
+        int unidadMedida = Integer.parseInt(request.getParameter("unidad_medida"));
+        
+        ProductoEnCarrito productoCarrito = new ProductoEnCarrito();
+        productoCarrito.setId(id);
+        productoCarrito.setUnidadMedida(unidadMedida);
+        productoCarrito.setCantidad(new BigDecimal(cantidad));
+        productoCarrito.indicarCantidad();
+              
+        
+        int indice = carrito.buscar(id);
+        carrito.modificar(productoCarrito,indice);
+
+        response.sendRedirect("venta.do?opcion=default");
+    }
+
+     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         processRequest(request, response);
@@ -93,166 +205,5 @@ public class VentaController extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }
-
     
-    
-    /**
-     * Este metodo busca el producto dentro de la base de datos y lo devuelve en
-     * formato JSON
-     *
-     * @param request
-     * @param response
-     * @throws IOException
-     */
-    private void buscar(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-        try (PrintWriter out = response.getWriter()) {
-
-            JSONObject js = new JSONObject();
-            int indice;
-            String stockP;
-
-            String codigo = request.getParameter("codigo");
-            producto = productoDao.getProducto(codigo);
-            
-            indice = venta.buscar(producto.getId());
-            
-            if(indice != -1)
-                
-                  stockP = venta.getListaProductos().get(indice).getProducto().getStock();
-            
-            else
-                stockP = producto.getStock();
-
-            if (producto != null) // Si el producto existe..s
-            {
-                js.put("producto", true);
-                js.put("stock", stockP);
-                js.put("forma_de_venta", producto.getFormaVenta());
-            } else {
-                js.put("producto", false);
-                js.put("stock", 0);
-                js.put("forma_de_venta", 0);
-
-            }
-
-            out.print(js);
-
-        }
-    }
-
-    /**
-     * Una vez encontrado el producto, este metodo se ejecuta para agregar a la
-     * lista del carrito
-     *
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException
-     */
-    private void agregar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String cantidadElegida = request.getParameter("cantidad");
-        BigDecimal cantidad = venta.indicarCantidad(cantidadElegida, producto.getUnidadMedida());
-
-        DetalleDeVenta detalleProducto = new DetalleDeVenta();
-        detalleProducto.setCantidad(cantidad.toString());
-        detalleProducto.setProducto(producto);
-
-        venta.agregar(detalleProducto);
-        request.getRequestDispatcher("venta.do?opcion=default").forward(request, response);
-    }
-    
-    
-
-    /**
-     * Este metodo funciona para guardar la venta que se realizo.
-     *
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException
-     */
-    private void generarVenta(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        // sí la lista de productos contiene al menos un elemento o más, guardar los datos
-        if (!venta.getListaProductos().isEmpty()) {
-            int forma_pago = Integer.parseInt(request.getParameter("forma_pago"));
-            venta.setMetodoPago(forma_pago);
-
-            // asignar la lista de productos del carrito
-            ventaDao.guardar(venta);
-            venta.limpiar();
-        }
-
-        request.getRequestDispatcher("venta.do?opcion=default").forward(request, response);
-    }
-
-    /**
-     * Este metodo quita el producto dentro de la lista
-     *
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException
-     */
-    private void quitar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        long id = Long.parseLong(request.getParameter("id"));
-        venta.quitar(id);
-        request.getRequestDispatcher("venta.do?opcion=default").forward(request, response);
-    }
-
-    /**
-     * Este metodo imprime la cantidad del producto seleccionado
-     *
-     * @param request
-     * @param response
-     * @throws IOException
-     */
-    private void leerCantidad(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-        try (PrintWriter out = response.getWriter()) {
-
-            int id = Integer.parseInt(request.getParameter("id"));
-
-            int posicion = venta.buscar(id);
-
-            String cantidad = venta.getListaProductos().get(posicion).getCantidad();
-            int uni_medida = venta.getListaProductos().get(posicion).getProducto().getUnidadMedida();
-            String stock = venta.getListaProductos().get(posicion).getProducto().getStock();
-
-            JSONObject jsCantidad = new JSONObject();
-            jsCantidad.put("cantidad", cantidad);
-            jsCantidad.put("unidad_medida", uni_medida);
-            jsCantidad.put("stock_disponible", stock);
-            response.addHeader("Access-Control-Allow-Origin", "*");
-            response.setCharacterEncoding("utf8");
-            response.setContentType("application/json");
-
-            out.print(jsCantidad);
-
-        }
-
-    }
-
-    /**
-     * Este metodo modifica el producto seleccionado
-     *
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException
-     */
-    private void modificar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        int id = Integer.parseInt(request.getParameter("id"));       
-        String cantidad = request.getParameter("cantidad");
-        int unidadMedida = Integer.parseInt(request.getParameter("unidad_medida"));
-        
-        int indice = venta.buscar(id);
-        venta.modificar(indice, cantidad, unidadMedida);
-
-        request.getRequestDispatcher("venta.do?opcion=default").forward(request, response);
-    }
-
 }

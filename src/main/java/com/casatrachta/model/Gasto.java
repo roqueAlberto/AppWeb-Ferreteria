@@ -15,6 +15,11 @@ public class Gasto {
     public Gasto() {
                
     }
+    
+    public Gasto(String descripcion,String monto) {
+       this.descripcion = descripcion;
+       this.monto = monto;
+    }
 
     public String getDescripcion() {
         return descripcion;

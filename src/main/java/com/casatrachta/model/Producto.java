@@ -3,27 +3,25 @@ package com.casatrachta.model;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-
 public class Producto {
 
     private long id;
     private String codigo;
     private String nombre;
     private String precio;
-    private String stock;
+    private BigDecimal stock;
     private int formaVenta;
-    private String stockOriginal;
     private int unidadMedida;
     private Seccion seccion;
+    private int idSeccion;
 
     public Producto() {
-        
     }
 
     public Producto(Seccion seccion) {
         this.seccion = seccion;
     }
-       
+
     public int getUnidadMedida() {
         return unidadMedida;
     }
@@ -32,14 +30,6 @@ public class Producto {
         this.unidadMedida = unidadMedida;
     }
 
-    public String getStockOriginal() {
-        return stockOriginal;
-    }
-
-    public void setStockOriginal(String stockOriginal) {
-        this.stockOriginal = stockOriginal;
-    }
-   
     public int getFormaVenta() {
         return formaVenta;
     }
@@ -80,14 +70,16 @@ public class Producto {
         this.precio = precio;
     }
 
-    public String getStock() {
+    public BigDecimal getStock() {
         return stock;
     }
 
-    public void setStock(String stock) {
+    public void setStock(BigDecimal stock) {
         this.stock = stock;
+        stockCorrespondiente();
+        
     }
-    
+
     public Seccion getSeccion() {
         return seccion;
     }
@@ -95,32 +87,26 @@ public class Producto {
     public void setSeccion(Seccion seccion) {
         this.seccion = seccion;
     }
-    
-    
-    public void setStockAdecuado(String uni_medida, String stock) {
-        if (uni_medida == null) 
-            uni_medida = "null";
-        
-        BigDecimal modificado = new BigDecimal(stock);
-        switch (uni_medida) {
 
-            case "1":
-                modificado = modificado.setScale(3, RoundingMode.FLOOR);
-                this.stock = modificado.toString();
-                break;
-            case "2":
-                modificado = modificado.setScale(2, RoundingMode.FLOOR);
-                this.stock = modificado.toString();
-                break;
-            case "null":
-                this.stock = stock;
-                break;
-            case "3":
-                this.stock = stock;
-                break;
+    private void stockCorrespondiente() {
+        int unidad = this.getUnidadMedida();
+        
+        if (unidad == 1) {
+            this.stock = this.stock.setScale(3, RoundingMode.FLOOR);
+        } else if (unidad == 2) {
+            this.stock = this.stock.setScale(2, RoundingMode.FLOOR);
         }
-     
+
     }
+
+    public int getIdSeccion() {
+        return idSeccion;
+    }
+
+    public void setIdSeccion(int idSeccion) {
+        this.idSeccion = idSeccion;
+    }
+
     
 
 

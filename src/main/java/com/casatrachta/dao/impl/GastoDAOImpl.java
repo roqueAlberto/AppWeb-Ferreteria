@@ -1,4 +1,3 @@
-
 package com.casatrachta.dao.impl;
 
 import com.casatrachta.dao.definition.IGastoDao;
@@ -10,20 +9,49 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-
 public class GastoDAOImpl implements IGastoDao {
 
     private Connection connection;
     private PreparedStatement preparedStatement;
     private ResultSet resultSet;
 
-    /**
-     * Metodo para guardar los datos del gasto en la base de datos.
-     * @param descripcion. Es la descripcion del gasto
-     * @param monto. Es lo que costó el gasto realizado
-     * @param fecha . Fecha en la que se realizo.
-     */
+    private static final String INSERT_CONSUMO = "INSERT INTO consumo(descripcion,monto,fecha) VALUES (?,?,?)";
+    private static final String SELECT_CONSUMOS = "SELECT descripcion,monto FROM consumo WHERE fecha = ? ";
+    private static final String SELECT_MONTO = "SELECT sum(monto) FROM consumo WHERE fecha = ?";
+
+  
     @Override
+    public String establecerTotal(String fecha) {
+
+        String total_gasto = "0.00";
+        try {
+
+            connection = Conexion.getConexion();
+            preparedStatement = connection.prepareStatement(SELECT_MONTO);
+            preparedStatement.setString(1, fecha);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                total_gasto = resultSet.getString(1);
+            }
+
+        } catch (SQLException sq) {
+
+        } finally {
+
+            try {
+                preparedStatement.close();
+                resultSet.close();
+                Conexion.closeConexion(connection);
+            } catch (SQLException e) {
+
+            }
+
+        }
+        return total_gasto;
+    }
+
+     @Override
     public void insertar(String descripcion, int monto, String fecha) {
 
         String sql = "INSERT INTO consumo(descripcion,monto,fecha) VALUES (?,?,?)";
@@ -95,44 +123,6 @@ public class GastoDAOImpl implements IGastoDao {
 
         return listaGastos;
 
-    }
-    
-
-    /**
-     * Esta función devuelve la suma total de gastos realizados en la fecha
-     *
-     * @param fecha. Es la fecha requerida 
-     * @return Devuelve el total
-     */
-    @Override
-    public String establecerTotal(String fecha) {
-
-        String query = "SELECT sum(monto) FROM consumo WHERE fecha = '"+fecha+"'";
-        String total_gasto = "0.00";
-
-        try {
-
-            connection = Conexion.getConexion();
-            preparedStatement = connection.prepareStatement(query);
-            resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) 
-                total_gasto = resultSet.getString(1);           
-
-        } catch (SQLException sq) {
-
-        } finally {
-
-            try {
-                preparedStatement.close();
-                resultSet.close();
-                Conexion.closeConexion(connection);
-            } catch (SQLException e) {
-
-            }
-
-        }
-        return total_gasto;
     }
 
 }

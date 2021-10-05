@@ -1,6 +1,7 @@
 package com.casatrachta.controller;
 
 import com.casatrachta.dao.impl.GastoDAOImpl;
+import com.casatrachta.model.Gasto;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,7 +10,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 
 @WebServlet(name = "GastoController", urlPatterns = {"/gasto.do"})
 public class GastoController extends HttpServlet {
@@ -24,29 +24,28 @@ public class GastoController extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-       
-            String opcion = request.getParameter("opcion");
 
-            switch (opcion) {
+        String opcion = request.getParameter("opcion");
 
-                case "GuardarGasto":
-                    guardarGasto(request, response);
-                    break;
+        switch (opcion) {
 
-                case "Buscar":
-                    buscarGasto(request, response);
-                    break;
+            case "GuardarGasto":
+                guardarGasto(request, response);
+                break;
 
-                case "consumos":
-                    informacion(request, response);
-                    break;
+            case "Buscar":
+                buscarGasto(request, response);
+                break;
 
-                default:
-                    request.getRequestDispatcher("/vistas/otros/Gasto.jsp").forward(request, response);
+            case "consumos":
+                informacion(request, response);
+                break;
 
-            }
+            default:
+                request.getRequestDispatcher("/views/otros/Gasto.jsp").forward(request, response);
 
-        
+        }
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -88,32 +87,22 @@ public class GastoController extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
-    /**
-     * Este metodo guarda los gastos realizados por parte del usuario    
-     */
+    
     private void guardarGasto(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String descripcion = request.getParameter("descripcion");
-        int monto = Integer.parseInt(request.getParameter("monto"));
-        gastoDao.insertar(descripcion, monto, getFechaActual());
+      
+        gastoDao.insertar(request.getParameter("descripcion"),Integer.parseInt(request.getParameter("monto")), Gasto.getFecha());
         request.getRequestDispatcher("gasto.do?opcion=consumos").forward(request, response);
     }
+
     
-    
-    /**
-      Este metodo brinda información acerca de los gastos, su monto y la fecha en que se realizo
-     */
     private void informacion(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setAttribute("gastos", gastoDao.listarGastos(getFechaActual()));//listar los gastos del día
         request.setAttribute("fecha", getFechaActual()); // envio fecha actual             
         request.setAttribute("total", gastoDao.establecerTotal(getFechaActual())); // monto total de gastos
         request.getRequestDispatcher("gasto.do?opcion=default").forward(request, response);
-
     }
 
     
-    /**
-     * Este metodo busca y devuelve los gastos realizados en la fecha seleccionada 
-     */
     private void buscarGasto(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String fecha = request.getParameter("fecha_seleccionada");
         request.setAttribute("fecha", fecha);

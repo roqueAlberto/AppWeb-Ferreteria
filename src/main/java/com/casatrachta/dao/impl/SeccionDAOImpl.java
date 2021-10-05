@@ -14,11 +14,10 @@ import java.util.List;
 
 public class SeccionDAOImpl implements ISeccionDao {
 
-    Connection conexion;
-    PreparedStatement ps;
-    ResultSet rs;
-    Producto producto;
-    Seccion seccion;
+    private Connection conexion;
+    private PreparedStatement ps;
+    private ResultSet rs;  
+    private Seccion seccion;
     
     
 
@@ -40,7 +39,7 @@ public class SeccionDAOImpl implements ISeccionDao {
 
             while (rs.next()) {
                 seccion = new Seccion();
-                seccion.setId_seccion(rs.getInt(1));
+                seccion.setId(rs.getInt(1));
                 seccion.setNombre(rs.getString(2));
 
                 listaSeccion.add(seccion);

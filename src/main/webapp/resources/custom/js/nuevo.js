@@ -2,8 +2,6 @@ $(function () {
 
     $("#codigo").focus();
 
-
-
     var input = document.getElementById("codigo");
 
     input.addEventListener("keyup", function (event) {
