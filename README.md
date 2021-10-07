@@ -1,10 +1,12 @@
-## Nombre del proyecto
+# Sistema Ferreteria 🛠
 Aplicacion web para ferreteria que permite gestionar los productos, llevar control de stock, control de inventario, gestionar ventas.
-Este proyecto fue realizado a traves de JSP y Servlets
-***
-## Diagrama de clases centrado en el modelo
 
-<img src="https://i.postimg.cc/Mpk1dx0F/Diagrama-de-clases-ferreteria.png">
+***
+## Diagrama de clases 
+
+<img src="https://i.postimg.cc/L5Mbp0Fr/diagrama-de-clase-model.png">
+<img src= "https://i.postimg.cc/zX8c2Mjh/diagrama-de-clases-dao-implementacion.png">
+<img src="https://i.postimg.cc/pXC1wZG6/diagrama-de-clase-dao-interfaces.png">
 
 
 ## Tecnologías
